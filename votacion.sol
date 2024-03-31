@@ -13,6 +13,7 @@ contract Counter{
 
 
     constructor (address _direccion){
+        //0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
         listaDirecciones.push(_direccion);
         crearPropuesta("1) Yeison");
         crearPropuesta("2) Camila");
@@ -46,14 +47,14 @@ contract Counter{
     function votar(uint256 posicionPropuesta) public {
         uint posicionDireccion;
         for(uint i = 0; i < listaDirecciones.length; i++){
-            if(msg.sender == listaDirecciones[0]){
+            if(msg.sender == listaDirecciones[i]){
                 listaPropuestas[posicionPropuesta].votos = listaPropuestas[posicionPropuesta].votos + 1;
                 posicionDireccion = i;
             }
         }
 
         //Elimina la dirección de la lista de direcciones para que no pueda votar mas
-        for(uint i = 0; i < listaDirecciones.length - 1; i++){
+        for(uint i = posicionDireccion; i < listaDirecciones.length - 1; i++){
             listaDirecciones[i] = listaDirecciones[i + 1];
         }
         listaDirecciones.pop();
