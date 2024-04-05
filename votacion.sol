@@ -3,29 +3,39 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 contract Votacion{
+
+    //Estructura para las propuestas
     struct Propuesta{
         string nombre;
         uint votos;
     }
 
+    //Estructura para los votantes
     struct Votante{
         address direccionVotante;
         bool haVotado;
     }
 
-    uint public tiempoTotal;
-    address public administrador;
-
-    Propuesta[] public listaPropuestas;
-    Votante[] public listaVotantes;
 
 
-    constructor (uint tiempoDeVotacion){
+
+    uint public tiempoTotal; //Tiempo disponible para votar
+    address public administrador; //Direccion del creador del contrato
+    Propuesta[] public listaPropuestas; //Lista de propuestas
+    Votante[] public listaVotantes; // Lista de votantes permitidos
 
 
-        //tiempoDeVotacion es el tiempo en segundos
-        tiempoTotal = block.timestamp + tiempoDeVotacion;
+
+
+    constructor (){
+
+        //Tiempo de votacion
+        tiempoTotal = block.timestamp + 259200;
+
+        //Guarda la direccion del creador del contrado
         administrador = msg.sender;
+
+        //Agrega 5 propuestas mas 1 en blanco
         crearPropuesta("(0) BLANCO");
         crearPropuesta("(1) Yeison");
         crearPropuesta("(2) Camila");
@@ -35,6 +45,7 @@ contract Votacion{
 
         //listaDirecciones.push(0x94d3595B283309b080F4d036BF9239D1fDC606F4);
 
+        //Agrega 6 direcciones que podrán votar
         Votante memory nuevoVotante0 = Votante({
             direccionVotante: msg.sender,
             haVotado: false
@@ -60,6 +71,7 @@ contract Votacion{
             haVotado: false
         });
 
+        //Agrega las direcciones de votantes a la lista de votantes
         listaVotantes.push(nuevoVotante0);
         listaVotantes.push(nuevoVotante1);
         listaVotantes.push(nuevoVotante2);
@@ -68,6 +80,10 @@ contract Votacion{
         listaVotantes.push(nuevoVotante5);
     }
 
+
+
+
+    //Para confirmar que el tiempo no haya acabado
     modifier hayTiempo(){
         if(block.timestamp > tiempoTotal){
             revert("El tiempo de votacion ha acabado");
@@ -78,6 +94,7 @@ contract Votacion{
 
 
 
+    //Agrega una nueva propuesta y verifica que solo lo pueda hacer el administrador
     function crearPropuesta(string memory nombrePropuesta) public hayTiempo {
 
         //require(msg.sender == listaVotantes[0].direccionVotante, "Solo el administrador puede agregar propuestas");
@@ -88,20 +105,18 @@ contract Votacion{
             });
             listaPropuestas.push(nuevaPropuesta);
         }
-
-    }
-
-
-    event LogDireccion(string texto,address direccion);
-
-    function imprimirDireccion() public {
-        emit LogDireccion("direccion22", msg.sender);
     }
 
 
 
+
+    //Agrega un voto a la propuesta que esté en la posición que se pasa como parametro
     function votar(uint256 posicionPropuesta) public hayTiempo {
+
         for(uint i = 0; i < listaVotantes.length; i++){
+            
+            //Verifica que la direccion que invoca el contrato esté en la lista de votantes
+            // y que no haya votando antes
             if(msg.sender == listaVotantes[i].direccionVotante && listaVotantes[i].haVotado == false){
                 listaPropuestas[posicionPropuesta].votos = listaPropuestas[posicionPropuesta].votos + 1;
                 listaVotantes[i].haVotado = true;
@@ -112,9 +127,11 @@ contract Votacion{
 
 
 
+
     function obtenerVotantes() public view returns(Votante[] memory){
         return listaVotantes;
     }
+    
     
     function obtenerPropuestas() public view returns(Propuesta[] memory){
         return listaPropuestas;
