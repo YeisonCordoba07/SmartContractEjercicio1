@@ -95,13 +95,15 @@ contract Votacion{
     //Agrega una nueva propuesta y verifica que solo lo pueda hacer el administrador
     function crearPropuesta(string memory nombrePropuesta) public hayTiempo {
 
-        //require(msg.sender == listaVotantes[0].direccionVotante, "Solo el administrador puede agregar propuestas");
+        //require(msg.sender == administrador, "Solo el administrador puede agregar propuestas");
         if(msg.sender == administrador){
             Propuesta memory nuevaPropuesta = Propuesta({
                 nombre: nombrePropuesta,
                 votos: 0
             });
             listaPropuestas.push(nuevaPropuesta);
+        }else{
+            revert("Solo el administrador puede agregar propuestas");
         }
     }
 
@@ -110,6 +112,7 @@ contract Votacion{
 
     //Agrega un voto a la propuesta que esté en la posición que se pasa como parametro
     function votar(uint256 posicionPropuesta) public hayTiempo {
+        bool haVotado = false;
 
         for(uint i = 0; i < listaVotantes.length; i++){
             
@@ -118,8 +121,13 @@ contract Votacion{
             if(msg.sender == listaVotantes[i].direccionVotante && listaVotantes[i].haVotado == false){
                 listaPropuestas[posicionPropuesta].votos = listaPropuestas[posicionPropuesta].votos + 1;
                 listaVotantes[i].haVotado = true;
+                haVotado = true;
                 break;
             }
+        }
+        //Si no se a encontrado la address o ya a votado, da error
+        if(haVotado == false){
+            revert("Su address no se agrego para votar o ya lo hizo");
         }
     }
 
